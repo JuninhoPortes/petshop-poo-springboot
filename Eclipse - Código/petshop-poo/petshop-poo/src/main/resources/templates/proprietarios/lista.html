@@ -1,0 +1,198 @@
+<!--
+    Tela de listagem de tutores.
+
+    Este template apresenta os proprietarios cadastrados, permitindo pesquisa
+    por nome, acesso ao formulario de cadastro, edicao de registros existentes
+    e solicitacao de exclusao controlada pela camada de servico.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PetShop POO | Tutores</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">PS</div>
+                <div>
+                    <strong>PetShop POO</strong>
+                    <span>Gestão integrada</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a th:href="@{/}">Painel</a>
+                <a class="active" th:href="@{/proprietarios}">Tutores</a>
+                <a href="#">Animais</a>
+                <a href="#">Serviços</a>
+                <a href="#">Atendimentos</a>
+                <a href="#">Relatórios</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Módulo de relacionamento</p>
+                        <h1>Tutores cadastrados</h1>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/proprietarios/novo}">Novo tutor</a>
+                </header>
+
+                <div class="alert success" th:if="${mensagemSucesso}" th:text="${mensagemSucesso}"></div>
+                <div class="alert danger" th:if="${mensagemErro}" th:text="${mensagemErro}"></div>
+
+                <section class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Consulta de tutores</h2>
+                            <p>Pesquise por nome ou visualize todos os proprietários cadastrados.</p>
+                        </div>
+                    </div>
+
+                    <form class="filter-bar" th:action="@{/proprietarios}" method="get">
+                        <input type="text" name="nome" th:value="${nome}" placeholder="Buscar tutor pelo nome">
+                        <button class="btn btn-secondary" type="submit">Pesquisar</button>
+                        <a class="btn btn-light" th:href="@{/proprietarios}">Limpar</a>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>E-mail</th>
+                                    <th>Endereço</th>
+                                    <th class="actions-column">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="proprietario : ${proprietarios}">
+                                    <td>
+                                        <strong th:text="${proprietario.nome}">Nome do tutor</strong>
+                                    </td>
+                                    <td th:text="${proprietario.telefone}">Telefone</td>
+                                    <td th:text="${proprietario.email != null && !proprietario.email.isBlank() ? proprietario.email : 'Não informado'}">
+                                        email@exemplo.com
+                                    </td>
+                                    <td th:text="${proprietario.endereco}">Endereço</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a class="btn btn-small btn-light"
+                                               th:href="@{/proprietarios/editar/{id}(id=${proprietario.id})}">
+                                                Editar
+                                            </a>
+
+                                            <form th:action="@{/proprietarios/excluir/{id}(id=${proprietario.id})}"
+                                                  method="post">
+                                                <button class="btn btn-small btn-danger js-open-delete-modal"
+                                                        type="button"
+                                                        th:attr="data-nome=${proprietario.nome}">
+                                                    Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${#lists.isEmpty(proprietarios)}">
+                                    <td colspan="5" class="empty-state">
+                                        Nenhum tutor foi encontrado para os critérios informados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="modal-icon">!</div>
+
+            <div class="modal-content">
+                <p class="eyebrow">Confirmação necessária</p>
+                <h2 id="deleteModalTitle">Excluir tutor</h2>
+                <p>
+                    Esta ação removerá o cadastro de
+                    <strong id="deleteTutorName">tutor selecionado</strong>.
+                    Caso existam animais vinculados, o sistema impedirá a exclusão
+                    para preservar a integridade dos dados.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" id="cancelDeleteButton">Cancelar</button>
+                <button class="btn btn-danger-solid" type="button" id="confirmDeleteButton">
+                    Confirmar exclusão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+            Script de controle do modal de exclusao.
+
+            Este trecho substitui a confirmacao nativa do navegador por uma
+            janela visualmente integrada ao sistema, preservando o mesmo fluxo
+            de envio do formulario utilizado pela camada Controller.
+        */
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteModal");
+            const tutorName = document.getElementById("deleteTutorName");
+            const cancelButton = document.getElementById("cancelDeleteButton");
+            const confirmButton = document.getElementById("confirmDeleteButton");
+            const openButtons = document.querySelectorAll(".js-open-delete-modal");
+
+            let selectedForm = null;
+
+            function openModal(button) {
+                selectedForm = button.closest("form");
+                tutorName.textContent = button.dataset.nome || "tutor selecionado";
+                modal.classList.add("is-visible");
+                modal.setAttribute("aria-hidden", "false");
+            }
+
+            function closeModal() {
+                selectedForm = null;
+                modal.classList.remove("is-visible");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            openButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal(button);
+                });
+            });
+
+            cancelButton.addEventListener("click", closeModal);
+
+            confirmButton.addEventListener("click", function () {
+                if (selectedForm) {
+                    selectedForm.submit();
+                }
+            });
+
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("is-visible")) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

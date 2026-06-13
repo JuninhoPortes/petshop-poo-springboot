@@ -1,0 +1,92 @@
+<!--
+    Formulario de cadastro e edicao de tutores.
+
+    Este template e utilizado tanto para novos cadastros quanto para alteracoes
+    de proprietarios existentes. Os dados informados sao validados pelas
+    anotacoes da camada Model e pelas regras da camada Service.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PetShop POO | Tutor</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">PS</div>
+                <div>
+                    <strong>PetShop POO</strong>
+                    <span>Gestão integrada</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a th:href="@{/}">Painel</a>
+                <a class="active" th:href="@{/proprietarios}">Tutores</a>
+                <a href="#">Animais</a>
+                <a href="#">Serviços</a>
+                <a href="#">Atendimentos</a>
+                <a href="#">Relatórios</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-container page-container-narrow">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Cadastro de tutor</p>
+                        <h1 th:text="${tituloPagina}">Novo tutor</h1>
+                        <span th:text="${subtituloPagina}">Preencha os dados cadastrais.</span>
+                    </div>
+                    <a class="btn btn-light" th:href="@{/proprietarios}">Voltar</a>
+                </header>
+
+                <section class="content-card form-card">
+                    <form th:action="@{/proprietarios/salvar}" th:object="${proprietario}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="alert danger" th:if="${#fields.hasGlobalErrors()}">
+                            <p th:each="erro : ${#fields.globalErrors()}" th:text="${erro}"></p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group span-2">
+                                <label for="nome">Nome completo</label>
+                                <input id="nome" type="text" th:field="*{nome}" placeholder="Ex.: Mariana Souza">
+                                <span class="field-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="endereco">Endereço</label>
+                                <input id="endereco" type="text" th:field="*{endereco}"
+                                       placeholder="Rua, número, bairro e cidade">
+                                <span class="field-error" th:if="${#fields.hasErrors('endereco')}" th:errors="*{endereco}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input id="telefone" type="text" th:field="*{telefone}" placeholder="(32) 99999-9999">
+                                <span class="field-error" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input id="email" type="email" th:field="*{email}" placeholder="tutor@email.com">
+                                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="btn btn-light" th:href="@{/proprietarios}">Cancelar</a>
+                            <button class="btn btn-primary" type="submit">Salvar tutor</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
