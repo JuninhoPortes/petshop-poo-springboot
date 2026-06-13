@@ -1,0 +1,64 @@
+/*
+    Folha de estilos principal da aplicacao PetShop POO.
+
+    Este arquivo define a identidade visual inicial da interface web,
+    priorizando legibilidade, organizacao dos elementos e uma navegacao
+    simples para os modulos centrais do sistema.
+*/
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #222;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.card {
+    width: 100%;
+    max-width: 900px;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.card h1 {
+    margin-bottom: 16px;
+    font-size: 32px;
+}
+
+.card p {
+    margin-bottom: 32px;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+
+.menu a {
+    min-width: 150px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: #2f6f4e;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.menu a:hover {
+    background: #25583e;
+}
