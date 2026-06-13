@@ -1,0 +1,187 @@
+<!--
+    Tela de consulta de historico de servicos.
+
+    Este template permite filtrar os atendimentos realizados por animal,
+    periodo e tipo de servico. A consulta fornece uma visao consolidada do
+    historico operacional, servindo tambem como base para os relatorios do
+    sistema.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Histórico')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('historico')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Consulta histórica</p>
+                        <h1>Histórico de serviços por animal</h1>
+                        <span>
+                            Filtre os atendimentos por pet, tipo de serviço e intervalo de datas.
+                        </span>
+                    </div>
+                </header>
+
+                <div th:replace="~{fragments/mensagens :: flash-messages}"></div>
+
+                <section class="content-card filter-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Filtros de consulta</h2>
+                            <p>Use os campos abaixo para localizar atendimentos específicos no histórico.</p>
+                        </div>
+                    </div>
+
+                    <form class="history-filter-grid" th:action="@{/historico}" method="get">
+                        <input type="hidden" name="consultar" value="true">
+
+                        <div class="form-group">
+                            <label for="animalId">Animal</label>
+                            <select id="animalId" name="animalId">
+                                <option value="">Todos os animais</option>
+                                <option th:each="animal : ${animais}"
+                                        th:value="${animal.id}"
+                                        th:selected="${animalId != null && animalId == animal.id}"
+                                        th:text="${animal.nome + ' - Tutor: ' + animal.proprietario.nome}">
+                                    Animal
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="servicoId">Tipo de serviço</label>
+                            <select id="servicoId" name="servicoId">
+                                <option value="">Todos os serviços</option>
+                                <option th:each="servico : ${servicos}"
+                                        th:value="${servico.id}"
+                                        th:selected="${servicoId != null && servicoId == servico.id}"
+                                        th:text="${servico.nome}">
+                                    Serviço
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataInicio">Data inicial</label>
+                            <input id="dataInicio"
+                                   name="dataInicio"
+                                   type="date"
+                                   th:value="${dataInicio != null ? #temporals.format(dataInicio, 'yyyy-MM-dd') : ''}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataFim">Data final</label>
+                            <input id="dataFim"
+                                   name="dataFim"
+                                   type="date"
+                                   th:value="${dataFim != null ? #temporals.format(dataFim, 'yyyy-MM-dd') : ''}">
+                        </div>
+
+                        <div class="history-filter-actions">
+                            <button class="btn btn-secondary" type="submit">Consultar histórico</button>
+                            <a class="btn btn-light" th:href="@{/historico}">Limpar filtros</a>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="content-card empty-guidance" th:if="${!consultaRealizada}">
+                    <div class="empty-guidance-icon">⌕</div>
+                    <div>
+                        <h2>Nenhuma consulta realizada</h2>
+                        <p>
+                            Selecione os filtros desejados e clique em <strong>Consultar histórico</strong>
+                            para visualizar os atendimentos registrados.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="summary-grid" th:if="${consultaRealizada}">
+                    <div class="summary-card">
+                        <span>Atendimentos encontrados</span>
+                        <strong th:text="${quantidadeAtendimentos}">0</strong>
+                    </div>
+
+                    <div class="summary-card">
+                        <span>Valor total filtrado</span>
+                        <strong th:text="${'R$ ' + #numbers.formatDecimal(valorTotal, 1, 'POINT', 2, 'COMMA')}">
+                            R$ 0,00
+                        </strong>
+                    </div>
+                </section>
+
+                <section class="content-card" th:if="${consultaRealizada}">
+                    <div class="card-header">
+                        <div>
+                            <h2>Resultado da consulta</h2>
+                            <p>Atendimentos compatíveis com os filtros informados.</p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Animal</th>
+                                    <th>Tutor</th>
+                                    <th>Serviço</th>
+                                    <th>Valor</th>
+                                    <th>Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="atendimento : ${atendimentos}">
+                                    <td th:text="${#temporals.format(atendimento.dataAtendimento, 'dd/MM/yyyy')}">
+                                        01/01/2026
+                                    </td>
+
+                                    <td>
+                                        <div class="entity-cell">
+                                            <div class="entity-avatar attendance-avatar"
+                                                 th:text="${#strings.substring(atendimento.animal.nome, 0, 1)}">
+                                                A
+                                            </div>
+                                            <div>
+                                                <strong th:text="${atendimento.animal.nome}">Animal</strong>
+                                                <span th:text="${atendimento.animal.especie}">Espécie</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td th:text="${atendimento.animal.proprietario.nome}">Tutor</td>
+
+                                    <td>
+                                        <div class="meta-stack">
+                                            <strong th:text="${atendimento.servico.nome}">Serviço</strong>
+                                            <span th:text="${atendimento.servico.ativo ? 'Serviço ativo' : 'Serviço inativo'}">
+                                                Status
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td th:text="${'R$ ' + #numbers.formatDecimal(atendimento.valorCobrado, 1, 'POINT', 2, 'COMMA')}">
+                                        R$ 0,00
+                                    </td>
+
+                                    <td th:text="${atendimento.observacoes != null && !atendimento.observacoes.isBlank() ? atendimento.observacoes : 'Sem observações'}">
+                                        Observações
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${#lists.isEmpty(atendimentos)}">
+                                    <td colspan="6" class="empty-state">
+                                        Nenhum atendimento foi encontrado para os filtros informados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

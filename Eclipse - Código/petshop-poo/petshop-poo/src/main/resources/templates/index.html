@@ -59,11 +59,17 @@
 					    <p>Registre serviços executados e valores cobrados.</p>
 					</a>
 
-                    <a class="module-card disabled" href="#">
-                        <span class="module-icon">05</span>
-                        <h3>Relatórios</h3>
-                        <p>Consulte histórico por cliente, animal, serviço e período.</p>
-                    </a>
+					<a class="module-card" th:href="@{/historico}">
+					    <span class="module-icon">05</span>
+					    <h3>Histórico</h3>
+					    <p>Consulte serviços realizados por animal, período e tipo de serviço.</p>
+					</a>
+
+					<a class="module-card disabled" href="#">
+					    <span class="module-icon">06</span>
+					    <h3>Relatórios</h3>
+					    <p>Gere relatórios por cliente, período, serviços prestados e totais.</p>
+					</a>
                 </section>
             </div>
         </main>
