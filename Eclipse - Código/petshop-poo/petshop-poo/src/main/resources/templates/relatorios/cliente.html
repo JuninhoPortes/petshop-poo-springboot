@@ -85,6 +85,20 @@
                 </section>
 
                 <div th:if="${consultaRealizada && relatorio != null}">
+					<section class="report-actions-panel">
+					    <div>
+					        <h2>Exportação do relatório</h2>
+					        <p>
+					            Gere uma versão em PDF contendo os dados do cliente, animais vinculados,
+					            serviços prestados e totais consolidados do período.
+					        </p>
+					    </div>
+
+					    <a class="btn btn-primary"
+					       th:href="@{/relatorios/pdf(proprietarioId=${proprietarioId}, dataInicio=${#temporals.format(dataInicio, 'yyyy-MM-dd')}, dataFim=${#temporals.format(dataFim, 'yyyy-MM-dd')})}">
+					        Exportar PDF
+					    </a>
+					</section>
                     <section class="summary-grid">
                         <div class="summary-card">
                             <span>Cliente</span>
