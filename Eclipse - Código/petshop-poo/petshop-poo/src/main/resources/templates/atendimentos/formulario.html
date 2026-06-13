@@ -1,0 +1,185 @@
+<!--
+    Formulario de lancamento de atendimentos.
+
+    Este template registra a prestacao de um servico para um animal cadastrado,
+    associando data, pet, procedimento executado, valor cobrado e observacoes.
+    Os dados informados alimentam o historico e os relatorios do sistema.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Atendimento')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('atendimentos')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container page-container-narrow">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Lançamento de serviço</p>
+                        <h1 th:text="${tituloPagina}">Novo atendimento</h1>
+                        <span th:text="${subtituloPagina}">Preencha os dados do atendimento.</span>
+                    </div>
+                    <a class="btn btn-light" th:href="@{/atendimentos}">Voltar</a>
+                </header>
+
+                <section class="content-card form-card">
+                    <form th:action="@{/atendimentos/salvar}" th:object="${atendimento}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="alert danger" th:if="${#fields.hasGlobalErrors()}">
+                            <p th:each="erro : ${#fields.globalErrors()}" th:text="${erro}"></p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="dataAtendimento">Data do atendimento</label>
+								<input id="dataAtendimento"
+								       name="dataAtendimento"
+								       type="date"
+								       th:value="${atendimento.dataAtendimento != null ? #temporals.format(atendimento.dataAtendimento, 'yyyy-MM-dd') : #temporals.format(dataAtual, 'yyyy-MM-dd')}">
+                                <span class="field-error" th:if="${#fields.hasErrors('dataAtendimento')}" th:errors="*{dataAtendimento}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="animal">Animal atendido</label>
+                                <select id="animal" th:field="*{animal.id}">
+                                    <option value="">Selecione um animal</option>
+                                    <option th:each="animal : ${animais}"
+                                            th:value="${animal.id}"
+                                            th:text="${animal.nome + ' - Tutor: ' + animal.proprietario.nome}">
+                                        Animal
+                                    </option>
+                                </select>
+                                <span class="field-error" th:if="${#fields.hasErrors('animal')}" th:errors="*{animal}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="servico">Serviço executado</label>
+                                <select id="servico" th:field="*{servico.id}">
+                                    <option value="">Selecione um serviço</option>
+                                    <option th:each="servico : ${servicos}"
+                                            th:value="${servico.id}"
+                                            th:text="${servico.nome + ' - R$ ' + #numbers.formatDecimal(servico.precoBase, 1, 'POINT', 2, 'COMMA')}"
+                                            th:attr="data-preco=${servico.precoBase}">
+                                        Serviço
+                                    </option>
+                                </select>
+                                <small class="field-hint">
+                                    Ao selecionar o serviço, o valor de referência será sugerido automaticamente.
+                                </small>
+                                <span class="field-error" th:if="${#fields.hasErrors('servico')}" th:errors="*{servico}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="valorCobradoVisual">Valor cobrado</label>
+
+                                <input type="hidden" id="valorCobrado" th:field="*{valorCobrado}">
+
+                                <input id="valorCobradoVisual"
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="10"
+                                       placeholder="Ex.: 79,90">
+
+                                <small class="field-hint">
+                                    Digite apenas números. O sistema formatará automaticamente o valor em reais.
+                                </small>
+
+                                <span class="field-error" th:if="${#fields.hasErrors('valorCobrado')}" th:errors="*{valorCobrado}"></span>
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="observacoes">Observações</label>
+                                <textarea id="observacoes" th:field="*{observacoes}" rows="4"
+                                          placeholder="Registre observações relevantes sobre o atendimento, se houver."></textarea>
+                                <span class="field-error" th:if="${#fields.hasErrors('observacoes')}" th:errors="*{observacoes}"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="btn btn-light" th:href="@{/atendimentos}">Cancelar</a>
+                            <button class="btn btn-primary" type="submit">Salvar atendimento</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /*
+            Script de apoio ao lancamento de atendimentos.
+
+            Este trecho aplica mascara monetaria ao valor cobrado e sugere,
+            automaticamente, o preco-base do servico selecionado. O valor visual
+            permanece em formato brasileiro, enquanto o campo oculto envia o
+            decimal em formato adequado para o backend.
+        */
+        document.addEventListener("DOMContentLoaded", function () {
+            const servicoSelect = document.getElementById("servico");
+            const inputVisual = document.getElementById("valorCobradoVisual");
+            const inputReal = document.getElementById("valorCobrado");
+
+            function apenasDigitos(valor) {
+                return valor.replace(/\D/g, "").slice(0, 7);
+            }
+
+            function formatarParaTela(digitos) {
+                if (!digitos) {
+                    return "";
+                }
+
+                const numero = Number(digitos) / 100;
+
+                return numero.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function formatarParaEnvio(digitos) {
+                if (!digitos) {
+                    return "";
+                }
+
+                const numero = Number(digitos) / 100;
+                return numero.toFixed(2);
+            }
+
+            function atualizarCampos(valorDigitado) {
+                const digitos = apenasDigitos(valorDigitado);
+
+                inputVisual.value = formatarParaTela(digitos);
+                inputReal.value = formatarParaEnvio(digitos);
+            }
+
+            function preencherPrecoServicoSelecionado() {
+                const option = servicoSelect.options[servicoSelect.selectedIndex];
+                const preco = option ? option.dataset.preco : "";
+
+                if (!preco) {
+                    return;
+                }
+
+                const precoNormalizado = String(preco).replace(".", "");
+                atualizarCampos(precoNormalizado);
+            }
+
+            if (inputReal.value) {
+                atualizarCampos(inputReal.value.replace(".", ""));
+            }
+
+            inputVisual.addEventListener("input", function () {
+                atualizarCampos(inputVisual.value);
+            });
+
+            servicoSelect.addEventListener("change", preencherPrecoServicoSelecionado);
+
+            inputVisual.form.addEventListener("submit", function () {
+                atualizarCampos(inputVisual.value);
+            });
+        });
+    </script>
+</body>
+</html>

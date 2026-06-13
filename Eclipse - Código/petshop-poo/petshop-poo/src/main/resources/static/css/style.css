@@ -796,3 +796,8 @@ textarea:focus {
 .switch-row input:checked + .switch-box::after {
     transform: translateX(18px);
 }
+
+.attendance-avatar {
+    background: #e7f0ff;
+    color: #2453a6;
+}

@@ -1,0 +1,195 @@
+<!--
+    Tela de listagem de atendimentos.
+
+    Este template apresenta os servicos prestados aos animais cadastrados,
+    permitindo visualizar data, animal, tutor, servico, valor cobrado e
+    observacoes operacionais do atendimento.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Atendimentos')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('atendimentos')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Registro operacional</p>
+                        <h1>Atendimentos realizados</h1>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/atendimentos/novo}">Novo atendimento</a>
+                </header>
+
+                <div th:replace="~{fragments/mensagens :: flash-messages}"></div>
+
+                <section class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Histórico geral de lançamentos</h2>
+                            <p>Consulte os serviços registrados para cada animal atendido pelo pet shop.</p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Animal</th>
+                                    <th>Tutor</th>
+                                    <th>Serviço</th>
+                                    <th>Valor</th>
+                                    <th>Observações</th>
+                                    <th class="actions-column">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="atendimento : ${atendimentos}">
+                                    <td th:text="${#temporals.format(atendimento.dataAtendimento, 'dd/MM/yyyy')}">
+                                        01/01/2026
+                                    </td>
+
+                                    <td>
+                                        <div class="entity-cell">
+                                            <div class="entity-avatar attendance-avatar"
+                                                 th:text="${#strings.substring(atendimento.animal.nome, 0, 1)}">
+                                                A
+                                            </div>
+                                            <div>
+                                                <strong th:text="${atendimento.animal.nome}">Animal</strong>
+                                                <span th:text="${atendimento.animal.especie}">Espécie</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td th:text="${atendimento.animal.proprietario.nome}">Tutor</td>
+
+                                    <td>
+                                        <div class="meta-stack">
+                                            <strong th:text="${atendimento.servico.nome}">Serviço</strong>
+                                            <span th:text="${atendimento.servico.ativo ? 'Serviço ativo' : 'Serviço inativo'}">
+                                                Status
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td th:text="${'R$ ' + #numbers.formatDecimal(atendimento.valorCobrado, 1, 'POINT', 2, 'COMMA')}">
+                                        R$ 0,00
+                                    </td>
+
+                                    <td th:text="${atendimento.observacoes != null && !atendimento.observacoes.isBlank() ? atendimento.observacoes : 'Sem observações'}">
+                                        Observações
+                                    </td>
+
+                                    <td>
+                                        <div class="table-actions">
+                                            <form th:action="@{/atendimentos/excluir/{id}(id=${atendimento.id})}"
+                                                  method="post">
+                                                <button class="btn btn-small btn-danger js-open-delete-modal"
+                                                        type="button"
+                                                        th:attr="data-nome=${atendimento.animal.nome + ' - ' + atendimento.servico.nome}">
+                                                    Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${#lists.isEmpty(atendimentos)}">
+                                    <td colspan="7" class="empty-state">
+                                        Nenhum atendimento foi registrado até o momento.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="modal-icon">!</div>
+
+            <div class="modal-content">
+                <p class="eyebrow">Confirmação necessária</p>
+                <h2 id="deleteModalTitle">Excluir atendimento</h2>
+                <p>
+                    Esta ação removerá o lançamento
+                    <strong id="deleteEntityName">atendimento selecionado</strong>.
+                    A exclusão deve ser utilizada apenas quando o registro tiver sido
+                    lançado de forma incorreta.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" id="cancelDeleteButton">Cancelar</button>
+                <button class="btn btn-danger-solid" type="button" id="confirmDeleteButton">
+                    Confirmar exclusão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+            Script de controle do modal de exclusao.
+
+            Este trecho substitui a confirmacao nativa do navegador por uma
+            janela integrada ao layout da aplicacao, mantendo o fluxo de envio
+            do formulario processado pelo controller.
+        */
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteModal");
+            const entityName = document.getElementById("deleteEntityName");
+            const cancelButton = document.getElementById("cancelDeleteButton");
+            const confirmButton = document.getElementById("confirmDeleteButton");
+            const openButtons = document.querySelectorAll(".js-open-delete-modal");
+
+            let selectedForm = null;
+
+            function openModal(button) {
+                selectedForm = button.closest("form");
+                entityName.textContent = button.dataset.nome || "registro selecionado";
+                modal.classList.add("is-visible");
+                modal.setAttribute("aria-hidden", "false");
+            }
+
+            function closeModal() {
+                selectedForm = null;
+                modal.classList.remove("is-visible");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            openButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal(button);
+                });
+            });
+
+            cancelButton.addEventListener("click", closeModal);
+
+            confirmButton.addEventListener("click", function () {
+                if (selectedForm) {
+                    selectedForm.submit();
+                }
+            });
+
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("is-visible")) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
