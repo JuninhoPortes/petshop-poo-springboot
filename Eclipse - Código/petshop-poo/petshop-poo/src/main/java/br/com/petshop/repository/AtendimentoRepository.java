@@ -19,7 +19,20 @@ import br.com.petshop.model.Atendimento;
  */
 public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> {
 
+    boolean existsByAnimalId(Long animalId);
+
+    boolean existsByServicoId(Long servicoId);
+
     List<Atendimento> findByAnimalIdOrderByDataAtendimentoDesc(Long animalId);
+
+    @Query("""
+            SELECT a FROM Atendimento a
+            JOIN FETCH a.animal an
+            JOIN FETCH a.servico s
+            JOIN FETCH an.proprietario p
+            ORDER BY a.dataAtendimento DESC
+            """)
+    List<Atendimento> buscarTodosComRelacionamentos();
 
     @Query("""
             SELECT a FROM Atendimento a

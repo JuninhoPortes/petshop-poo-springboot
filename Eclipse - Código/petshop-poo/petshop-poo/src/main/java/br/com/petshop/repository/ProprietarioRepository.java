@@ -1,6 +1,7 @@
 package br.com.petshop.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,6 +18,8 @@ import br.com.petshop.model.Proprietario;
 public interface ProprietarioRepository extends JpaRepository<Proprietario, Long> {
 
     List<Proprietario> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
+
+    Optional<Proprietario> findByEmailIgnoreCase(String email);
 
     boolean existsByEmail(String email);
 }

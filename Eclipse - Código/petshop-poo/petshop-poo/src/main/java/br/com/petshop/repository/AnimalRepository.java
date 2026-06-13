@@ -21,6 +21,8 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     List<Animal> findByProprietarioIdOrderByNomeAsc(Long proprietarioId);
 
+    boolean existsByProprietarioId(Long proprietarioId);
+
     @Query("SELECT a FROM Animal a JOIN FETCH a.proprietario ORDER BY a.nome ASC")
     List<Animal> buscarTodosComProprietario();
 }
