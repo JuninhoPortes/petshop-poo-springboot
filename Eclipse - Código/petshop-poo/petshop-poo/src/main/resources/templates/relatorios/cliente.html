@@ -1,0 +1,277 @@
+<!--
+    Tela de relatorio personalizado por cliente.
+
+    Este template apresenta dados do tutor, animais vinculados, atendimentos
+    realizados em determinado periodo e totais consolidados por servico e por
+    data. A tela atende ao requisito de relatorio personalizado do sistema.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Relatórios')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('relatorios')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Relatório gerencial</p>
+                        <h1>Relatório por cliente</h1>
+                        <span>
+                            Consulte os serviços prestados a um tutor em um período específico.
+                        </span>
+                    </div>
+                </header>
+
+                <div th:replace="~{fragments/mensagens :: flash-messages}"></div>
+
+                <section class="content-card filter-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Parâmetros do relatório</h2>
+                            <p>Selecione o tutor e o período desejado para consolidar os atendimentos.</p>
+                        </div>
+                    </div>
+
+                    <form class="report-filter-grid" th:action="@{/relatorios}" method="get">
+                        <input type="hidden" name="gerar" value="true">
+
+                        <div class="form-group">
+                            <label for="proprietarioId">Tutor</label>
+                            <select id="proprietarioId" name="proprietarioId">
+                                <option value="">Selecione um tutor</option>
+                                <option th:each="proprietario : ${proprietarios}"
+                                        th:value="${proprietario.id}"
+                                        th:selected="${proprietarioId != null && proprietarioId == proprietario.id}"
+                                        th:text="${proprietario.nome}">
+                                    Tutor
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataInicio">Data inicial</label>
+                            <input id="dataInicio"
+                                   name="dataInicio"
+                                   type="date"
+                                   th:value="${dataInicio != null ? #temporals.format(dataInicio, 'yyyy-MM-dd') : ''}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataFim">Data final</label>
+                            <input id="dataFim"
+                                   name="dataFim"
+                                   type="date"
+                                   th:value="${dataFim != null ? #temporals.format(dataFim, 'yyyy-MM-dd') : ''}">
+                        </div>
+
+                        <div class="report-filter-actions">
+                            <button class="btn btn-secondary" type="submit">Gerar relatório</button>
+                            <a class="btn btn-light" th:href="@{/relatorios}">Limpar</a>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="content-card empty-guidance" th:if="${!consultaRealizada}">
+                    <div class="empty-guidance-icon">R</div>
+                    <div>
+                        <h2>Nenhum relatório gerado</h2>
+                        <p>
+                            Selecione um tutor, informe o período e clique em
+                            <strong>Gerar relatório</strong> para visualizar os dados consolidados.
+                        </p>
+                    </div>
+                </section>
+
+                <div th:if="${consultaRealizada && relatorio != null}">
+                    <section class="summary-grid">
+                        <div class="summary-card">
+                            <span>Cliente</span>
+                            <strong th:text="${relatorio.proprietario.nome}">Nome do cliente</strong>
+                        </div>
+
+                        <div class="summary-card">
+                            <span>Valor total no período</span>
+                            <strong th:text="${'R$ ' + #numbers.formatDecimal(relatorio.valorTotal, 1, 'POINT', 2, 'COMMA')}">
+                                R$ 0,00
+                            </strong>
+                        </div>
+                    </section>
+
+                    <section class="report-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Dados do cliente</h2>
+                                    <p>Informações cadastrais utilizadas no relatório.</p>
+                                </div>
+                            </div>
+
+                            <div class="info-list">
+                                <div>
+                                    <span>Nome</span>
+                                    <strong th:text="${relatorio.proprietario.nome}">Nome</strong>
+                                </div>
+                                <div>
+                                    <span>Telefone</span>
+                                    <strong th:text="${relatorio.proprietario.telefone}">Telefone</strong>
+                                </div>
+                                <div>
+                                    <span>E-mail</span>
+                                    <strong th:text="${relatorio.proprietario.email != null && !relatorio.proprietario.email.isBlank() ? relatorio.proprietario.email : 'Não informado'}">
+                                        E-mail
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span>Endereço</span>
+                                    <strong th:text="${relatorio.proprietario.endereco}">Endereço</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Animais vinculados</h2>
+                                    <p>Pets cadastrados para o tutor selecionado.</p>
+                                </div>
+                            </div>
+
+                            <div class="animal-chip-list">
+                                <span class="animal-chip" th:each="animal : ${relatorio.animais}">
+                                    <strong th:text="${animal.nome}">Animal</strong>
+                                    <small th:text="${animal.especie}">Espécie</small>
+                                </span>
+
+                                <p class="empty-state" th:if="${#lists.isEmpty(relatorio.animais)}">
+                                    Nenhum animal vinculado ao tutor.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h2>Serviços prestados no período</h2>
+                                <p>
+                                    Detalhamento dos atendimentos entre
+                                    <strong th:text="${#temporals.format(relatorio.dataInicio, 'dd/MM/yyyy')}">Data inicial</strong>
+                                    e
+                                    <strong th:text="${#temporals.format(relatorio.dataFim, 'dd/MM/yyyy')}">Data final</strong>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Animal</th>
+                                        <th>Serviço</th>
+                                        <th>Valor</th>
+                                        <th>Observações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="atendimento : ${relatorio.atendimentos}">
+                                        <td th:text="${#temporals.format(atendimento.dataAtendimento, 'dd/MM/yyyy')}">
+                                            Data
+                                        </td>
+                                        <td th:text="${atendimento.animal.nome}">Animal</td>
+                                        <td th:text="${atendimento.servico.nome}">Serviço</td>
+                                        <td th:text="${'R$ ' + #numbers.formatDecimal(atendimento.valorCobrado, 1, 'POINT', 2, 'COMMA')}">
+                                            Valor
+                                        </td>
+                                        <td th:text="${atendimento.observacoes != null && !atendimento.observacoes.isBlank() ? atendimento.observacoes : 'Sem observações'}">
+                                            Observações
+                                        </td>
+                                    </tr>
+
+                                    <tr th:if="${#lists.isEmpty(relatorio.atendimentos)}">
+                                        <td colspan="5" class="empty-state">
+                                            Nenhum serviço foi prestado ao cliente no período informado.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="report-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Total por serviço</h2>
+                                    <p>Consolidação financeira por tipo de serviço.</p>
+                                </div>
+                            </div>
+
+                            <div class="table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Serviço</th>
+                                            <th>Qtd.</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="total : ${relatorio.totaisPorServico}">
+                                            <td th:text="${total.nomeServico}">Serviço</td>
+                                            <td th:text="${total.quantidade}">0</td>
+                                            <td th:text="${'R$ ' + #numbers.formatDecimal(total.valorTotal, 1, 'POINT', 2, 'COMMA')}">
+                                                R$ 0,00
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(relatorio.totaisPorServico)}">
+                                            <td colspan="3" class="empty-state">Sem totais por serviço.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Total por data</h2>
+                                    <p>Consolidação dos valores por dia de atendimento.</p>
+                                </div>
+                            </div>
+
+                            <div class="table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Qtd.</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="total : ${relatorio.totaisPorData}">
+                                            <td th:text="${#temporals.format(total.data, 'dd/MM/yyyy')}">Data</td>
+                                            <td th:text="${total.quantidade}">0</td>
+                                            <td th:text="${'R$ ' + #numbers.formatDecimal(total.valorTotal, 1, 'POINT', 2, 'COMMA')}">
+                                                R$ 0,00
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(relatorio.totaisPorData)}">
+                                            <td colspan="3" class="empty-state">Sem totais por data.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
