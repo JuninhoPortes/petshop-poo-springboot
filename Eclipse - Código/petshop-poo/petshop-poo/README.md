@@ -421,5 +421,5 @@ http://localhost:8080
 
 Projeto desenvolvido como atividade acadêmica da disciplina de Programação Orientada a Objetos.
 
-Curso: Ciência da Computação
+Curso: Ciência da Computação<br>
 Instituição: UNIPAC Barbacena
