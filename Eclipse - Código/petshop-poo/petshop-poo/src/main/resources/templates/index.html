@@ -7,84 +7,65 @@
 -->
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>PetShop POO | Painel Principal</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('PetShop POO | Painel Principal')}"></head>
 <body>
     <div class="app-shell">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-icon">PS</div>
-                <div>
-                    <strong>PetShop POO</strong>
-                    <span>Gestão integrada</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a class="active" th:href="@{/}">Painel</a>
-                <a th:href="@{/proprietarios}">Tutores</a>
-                <a href="#">Animais</a>
-                <a href="#">Serviços</a>
-                <a href="#">Atendimentos</a>
-                <a href="#">Relatórios</a>
-            </nav>
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar('painel')}"></aside>
 
         <main class="main-content">
-            <header class="topbar">
-                <div>
-                    <p class="eyebrow">Sistema acadêmico profissional</p>
-                    <h1>Gerenciamento de Pet Shop</h1>
-                </div>
-                <a class="btn btn-primary" th:href="@{/proprietarios/novo}">Cadastrar tutor</a>
-            </header>
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Sistema acadêmico profissional</p>
+                        <h1>Gerenciamento de Pet Shop</h1>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/proprietarios/novo}">Cadastrar tutor</a>
+                </header>
 
-            <section class="hero-panel">
-                <div>
-                    <span class="status-pill">Spring Boot + MVC + MySQL</span>
-                    <h2>Controle operacional com organização em camadas</h2>
-                    <p>
-                        Plataforma web desenvolvida para centralizar cadastros de tutores,
-                        animais, serviços prestados, histórico de atendimentos e relatórios
-                        personalizados.
-                    </p>
-                </div>
-            </section>
+                <section class="hero-panel">
+                    <div>
+                        <span class="status-pill">Spring Boot + MVC + MySQL</span>
+                        <h2>Controle operacional com organização em camadas</h2>
+                        <p>
+                            Plataforma web desenvolvida para centralizar cadastros de tutores,
+                            animais, serviços prestados, histórico de atendimentos e relatórios
+                            personalizados.
+                        </p>
+                    </div>
+                </section>
 
-            <section class="dashboard-grid">
-                <a class="module-card" th:href="@{/proprietarios}">
-                    <span class="module-icon">01</span>
-                    <h3>Tutores</h3>
-                    <p>Cadastre e consulte os responsáveis pelos animais atendidos.</p>
-                </a>
+                <section class="dashboard-grid">
+                    <a class="module-card" th:href="@{/proprietarios}">
+                        <span class="module-icon">01</span>
+                        <h3>Tutores</h3>
+                        <p>Cadastre e consulte os responsáveis pelos animais atendidos.</p>
+                    </a>
 
-                <a class="module-card disabled" href="#">
-                    <span class="module-icon">02</span>
-                    <h3>Animais</h3>
-                    <p>Gerencie dados dos pets, incluindo espécie, raça, peso e tutor.</p>
-                </a>
+                    <a class="module-card disabled" href="#">
+                        <span class="module-icon">02</span>
+                        <h3>Animais</h3>
+                        <p>Gerencie dados dos pets, incluindo espécie, raça, peso e tutor.</p>
+                    </a>
 
-                <a class="module-card disabled" href="#">
-                    <span class="module-icon">03</span>
-                    <h3>Serviços</h3>
-                    <p>Organize os procedimentos oferecidos pelo pet shop.</p>
-                </a>
+                    <a class="module-card disabled" href="#">
+                        <span class="module-icon">03</span>
+                        <h3>Serviços</h3>
+                        <p>Organize os procedimentos oferecidos pelo pet shop.</p>
+                    </a>
 
-                <a class="module-card disabled" href="#">
-                    <span class="module-icon">04</span>
-                    <h3>Atendimentos</h3>
-                    <p>Registre serviços executados e valores cobrados.</p>
-                </a>
+                    <a class="module-card disabled" href="#">
+                        <span class="module-icon">04</span>
+                        <h3>Atendimentos</h3>
+                        <p>Registre serviços executados e valores cobrados.</p>
+                    </a>
 
-                <a class="module-card disabled" href="#">
-                    <span class="module-icon">05</span>
-                    <h3>Relatórios</h3>
-                    <p>Consulte histórico por cliente, animal, serviço e período.</p>
-                </a>
-            </section>
+                    <a class="module-card disabled" href="#">
+                        <span class="module-icon">05</span>
+                        <h3>Relatórios</h3>
+                        <p>Consulte histórico por cliente, animal, serviço e período.</p>
+                    </a>
+                </section>
+            </div>
         </main>
     </div>
 </body>

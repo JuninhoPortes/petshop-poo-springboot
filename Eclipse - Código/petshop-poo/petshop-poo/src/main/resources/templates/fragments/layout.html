@@ -1,0 +1,17 @@
+<!--
+    Fragmentos estruturais da aplicacao PetShop POO.
+
+    Este arquivo concentra elementos reutilizaveis relacionados a estrutura
+    basica das paginas, como o cabecalho HTML, definicao de charset, titulo
+    dinamico e importacao da folha de estilos principal. A centralizacao desse
+    trecho evita repeticao de codigo nos templates Thymeleaf.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">PetShop POO</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+</html>

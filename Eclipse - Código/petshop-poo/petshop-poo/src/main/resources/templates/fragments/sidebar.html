@@ -1,0 +1,31 @@
+<!--
+    Fragmento de navegacao lateral da aplicacao PetShop POO.
+
+    Este componente representa o menu principal do sistema e sera reutilizado
+    nas telas dos modulos funcionais. O parametro recebido pelo fragmento define
+    qual item de menu deve aparecer como ativo, mantendo consistencia visual
+    durante a navegacao.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside class="sidebar" th:fragment="sidebar(menuAtivo)">
+        <div class="brand">
+            <div class="brand-icon">PS</div>
+            <div>
+                <strong>PetShop POO</strong>
+                <span>Gestão integrada</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/}" th:classappend="${menuAtivo == 'painel'} ? 'active'">Painel</a>
+            <a th:href="@{/proprietarios}" th:classappend="${menuAtivo == 'proprietarios'} ? 'active'">Tutores</a>
+            <a href="#" th:classappend="${menuAtivo == 'animais'} ? 'active'">Animais</a>
+            <a href="#" th:classappend="${menuAtivo == 'servicos'} ? 'active'">Serviços</a>
+            <a href="#" th:classappend="${menuAtivo == 'atendimentos'} ? 'active'">Atendimentos</a>
+            <a href="#" th:classappend="${menuAtivo == 'relatorios'} ? 'active'">Relatórios</a>
+        </nav>
+    </aside>
+</body>
+</html>

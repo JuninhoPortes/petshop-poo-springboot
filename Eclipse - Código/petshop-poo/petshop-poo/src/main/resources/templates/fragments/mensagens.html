@@ -1,0 +1,16 @@
+<!--
+    Fragmento responsavel pela exibicao de mensagens operacionais.
+
+    Este componente centraliza a apresentacao de mensagens de sucesso e erro
+    enviadas pelos controllers por meio de RedirectAttributes. Assim, as telas
+    do sistema reutilizam o mesmo padrao visual para comunicacao com o usuario.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="flash-messages">
+        <div class="alert success" th:if="${mensagemSucesso}" th:text="${mensagemSucesso}"></div>
+        <div class="alert danger" th:if="${mensagemErro}" th:text="${mensagemErro}"></div>
+    </div>
+</body>
+</html>

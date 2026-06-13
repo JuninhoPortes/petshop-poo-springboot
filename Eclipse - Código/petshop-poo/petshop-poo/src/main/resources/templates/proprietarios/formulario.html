@@ -7,31 +7,10 @@
 -->
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>PetShop POO | Tutor</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('PetShop POO | Tutor')}"></head>
 <body>
     <div class="app-shell">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-icon">PS</div>
-                <div>
-                    <strong>PetShop POO</strong>
-                    <span>Gestão integrada</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a th:href="@{/}">Painel</a>
-                <a class="active" th:href="@{/proprietarios}">Tutores</a>
-                <a href="#">Animais</a>
-                <a href="#">Serviços</a>
-                <a href="#">Atendimentos</a>
-                <a href="#">Relatórios</a>
-            </nav>
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar('proprietarios')}"></aside>
 
         <main class="main-content">
             <div class="page-container page-container-narrow">
