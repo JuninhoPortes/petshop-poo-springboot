@@ -1,0 +1,206 @@
+<!--
+    Tela de listagem de animais.
+
+    Este template apresenta os pets cadastrados no sistema, permitindo pesquisa
+    por nome, acesso ao formulario de cadastro, edicao de registros existentes
+    e exclusao controlada pela camada de servico.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Animais')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('animais')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Módulo de cuidado animal</p>
+                        <h1>Animais cadastrados</h1>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/animais/novo}">Novo animal</a>
+                </header>
+
+                <div th:replace="~{fragments/mensagens :: flash-messages}"></div>
+
+                <section class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Consulta de animais</h2>
+                            <p>Pesquise pets por nome e consulte rapidamente seus tutores vinculados.</p>
+                        </div>
+                    </div>
+
+                    <form class="filter-bar" th:action="@{/animais}" method="get">
+                        <input type="text" name="nome" th:value="${nome}" placeholder="Buscar animal pelo nome">
+                        <button class="btn btn-secondary" type="submit">Pesquisar</button>
+                        <a class="btn btn-light" th:href="@{/animais}">Limpar</a>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Animal</th>
+                                    <th>Espécie/Raça</th>
+                                    <th>Tutor</th>
+                                    <th>Sexo</th>
+                                    <th>Peso</th>
+                                    <th>Idade</th>
+                                    <th class="actions-column">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="animal : ${animais}">
+                                    <td>
+										<div class="entity-cell">
+										    <div class="entity-photo-wrapper">
+										        <img class="entity-photo"
+										             th:if="${animal.fotoCaminho != null && !animal.fotoCaminho.isBlank()}"
+										             th:src="${animal.fotoCaminho}"
+										             th:alt="'Foto de ' + ${animal.nome}">
+
+										        <div class="entity-avatar"
+										             th:if="${animal.fotoCaminho == null || animal.fotoCaminho.isBlank()}"
+										             th:text="${#strings.substring(animal.nome, 0, 1)}">
+										            A
+										        </div>
+										    </div>
+
+										    <div>
+										        <strong th:text="${animal.nome}">Nome do animal</strong>
+										        <span th:if="${animal.fotoCaminho != null && !animal.fotoCaminho.isBlank()}">
+										            Foto vinculada
+										        </span>
+										    </div>
+										</div>
+                                    </td>
+                                    <td>
+                                        <div class="meta-stack">
+                                            <strong th:text="${animal.especie}">Espécie</strong>
+                                            <span th:text="${animal.raca != null && !animal.raca.isBlank() ? animal.raca : 'Raça não informada'}">
+                                                Raça
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${animal.proprietario.nome}">Tutor</td>
+                                    <td>
+                                        <span class="badge" th:text="${animal.sexo.descricao}">Sexo</span>
+                                    </td>
+                                    <td th:text="${animal.peso + ' kg'}">0.00 kg</td>
+                                    <td th:text="${animal.idade + ' ano(s)'}">0 ano(s)</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a class="btn btn-small btn-light"
+                                               th:href="@{/animais/editar/{id}(id=${animal.id})}">
+                                                Editar
+                                            </a>
+
+                                            <form th:action="@{/animais/excluir/{id}(id=${animal.id})}" method="post">
+                                                <button class="btn btn-small btn-danger js-open-delete-modal"
+                                                        type="button"
+                                                        th:attr="data-nome=${animal.nome}">
+                                                    Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${#lists.isEmpty(animais)}">
+                                    <td colspan="7" class="empty-state">
+                                        Nenhum animal foi encontrado para os critérios informados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="modal-icon">!</div>
+
+            <div class="modal-content">
+                <p class="eyebrow">Confirmação necessária</p>
+                <h2 id="deleteModalTitle">Excluir animal</h2>
+                <p>
+                    Esta ação removerá o cadastro de
+                    <strong id="deleteEntityName">animal selecionado</strong>.
+                    Caso existam atendimentos vinculados, o sistema impedirá a exclusão
+                    para preservar o histórico de serviços.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" id="cancelDeleteButton">Cancelar</button>
+                <button class="btn btn-danger-solid" type="button" id="confirmDeleteButton">
+                    Confirmar exclusão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+            Script de controle do modal de exclusao.
+
+            Este trecho substitui a confirmacao nativa do navegador por uma
+            janela integrada ao layout da aplicacao, mantendo o fluxo de envio
+            do formulario processado pelo controller.
+        */
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteModal");
+            const entityName = document.getElementById("deleteEntityName");
+            const cancelButton = document.getElementById("cancelDeleteButton");
+            const confirmButton = document.getElementById("confirmDeleteButton");
+            const openButtons = document.querySelectorAll(".js-open-delete-modal");
+
+            let selectedForm = null;
+
+            function openModal(button) {
+                selectedForm = button.closest("form");
+                entityName.textContent = button.dataset.nome || "registro selecionado";
+                modal.classList.add("is-visible");
+                modal.setAttribute("aria-hidden", "false");
+            }
+
+            function closeModal() {
+                selectedForm = null;
+                modal.classList.remove("is-visible");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            openButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal(button);
+                });
+            });
+
+            cancelButton.addEventListener("click", closeModal);
+
+            confirmButton.addEventListener("click", function () {
+                if (selectedForm) {
+                    selectedForm.submit();
+                }
+            });
+
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("is-visible")) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

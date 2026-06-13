@@ -16,10 +16,10 @@ import br.com.petshop.repository.ProprietarioRepository;
 /**
  * Service responsavel pelas regras de negocio relacionadas aos animais.
  *
- * Esta classe controla o cadastro e a consulta de pets, garantindo que cada
- * animal seja associado a um tutor valido. Tambem impede exclusoes indevidas
- * quando ja existem atendimentos registrados, preservando a integridade do
- * historico de servicos prestados.
+ * Esta classe controla o cadastro, a edicao, a consulta e a exclusao de pets,
+ * garantindo que cada animal esteja vinculado a um tutor existente. Tambem
+ * protege o historico operacional do sistema ao impedir a remocao de animais
+ * que ja possuem atendimentos registrados.
  */
 @Service
 public class AnimalService {
@@ -46,7 +46,7 @@ public class AnimalService {
             return listarTodos();
         }
 
-        return animalRepository.findByNomeContainingIgnoreCaseOrderByNomeAsc(nome.trim());
+        return animalRepository.buscarPorNomeComProprietario(nome.trim());
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +56,7 @@ public class AnimalService {
 
     @Transactional(readOnly = true)
     public Animal buscarPorId(Long id) {
-        return animalRepository.findById(id)
+        return animalRepository.buscarPorIdComProprietario(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Animal nao encontrado."));
     }
 
@@ -89,15 +89,15 @@ public class AnimalService {
     }
 
     private void prepararDados(Animal animal) {
-        animal.setNome(animal.getNome().trim());
-        animal.setEspecie(animal.getEspecie().trim());
+        animal.setNome(limparTexto(animal.getNome()));
+        animal.setEspecie(limparTexto(animal.getEspecie()));
+        animal.setRaca(limparTexto(animal.getRaca()));
 
-        if (animal.getRaca() != null) {
-            animal.setRaca(animal.getRaca().trim());
-        }
+        String fotoCaminho = limparTexto(animal.getFotoCaminho());
+        animal.setFotoCaminho(fotoCaminho == null || fotoCaminho.isBlank() ? null : fotoCaminho);
+    }
 
-        if (animal.getFotoCaminho() != null) {
-            animal.setFotoCaminho(animal.getFotoCaminho().trim());
-        }
+    private String limparTexto(String valor) {
+        return valor == null ? null : valor.trim();
     }
 }

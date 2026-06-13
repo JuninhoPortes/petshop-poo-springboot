@@ -1,0 +1,112 @@
+<!--
+    Formulario de cadastro e edicao de animais.
+
+    Este template permite registrar os dados cadastrais do pet e vincula-lo a
+    um tutor previamente cadastrado. As informacoes sao validadas pela camada
+    Model e complementadas pelas regras da camada Service.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Animal')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('animais')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container page-container-narrow">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Cadastro de animal</p>
+                        <h1 th:text="${tituloPagina}">Novo animal</h1>
+                        <span th:text="${subtituloPagina}">Preencha os dados cadastrais.</span>
+                    </div>
+                    <a class="btn btn-light" th:href="@{/animais}">Voltar</a>
+                </header>
+
+                <section class="content-card form-card">
+                    <form th:action="@{/animais/salvar}" th:object="${animal}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="alert danger" th:if="${#fields.hasGlobalErrors()}">
+                            <p th:each="erro : ${#fields.globalErrors()}" th:text="${erro}"></p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nome">Nome do animal</label>
+                                <input id="nome" type="text" th:field="*{nome}" placeholder="Ex.: Thor">
+                                <span class="field-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="proprietario">Tutor responsável</label>
+                                <select id="proprietario" th:field="*{proprietario.id}">
+                                    <option value="">Selecione um tutor</option>
+                                    <option th:each="proprietario : ${proprietarios}"
+                                            th:value="${proprietario.id}"
+                                            th:text="${proprietario.nome}">
+                                        Nome do tutor
+                                    </option>
+                                </select>
+                                <span class="field-error" th:if="${#fields.hasErrors('proprietario')}" th:errors="*{proprietario}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="especie">Espécie</label>
+                                <input id="especie" type="text" th:field="*{especie}" placeholder="Ex.: Cachorro">
+                                <span class="field-error" th:if="${#fields.hasErrors('especie')}" th:errors="*{especie}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="raca">Raça</label>
+                                <input id="raca" type="text" th:field="*{raca}" placeholder="Ex.: Golden Retriever">
+                                <span class="field-error" th:if="${#fields.hasErrors('raca')}" th:errors="*{raca}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="idade">Idade</label>
+                                <input id="idade" type="number" min="0" th:field="*{idade}" placeholder="Ex.: 3">
+                                <span class="field-error" th:if="${#fields.hasErrors('idade')}" th:errors="*{idade}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sexo">Sexo</label>
+                                <select id="sexo" th:field="*{sexo}">
+                                    <option value="">Selecione</option>
+                                    <option th:each="sexo : ${sexos}"
+                                            th:value="${sexo}"
+                                            th:text="${sexo.descricao}">
+                                        Sexo
+                                    </option>
+                                </select>
+                                <span class="field-error" th:if="${#fields.hasErrors('sexo')}" th:errors="*{sexo}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="peso">Peso em kg</label>
+                                <input id="peso" type="number" step="0.01" min="0.01" th:field="*{peso}" placeholder="Ex.: 12.50">
+                                <span class="field-error" th:if="${#fields.hasErrors('peso')}" th:errors="*{peso}"></span>
+                            </div>
+
+							<div class="form-group">
+							    <label for="fotoCaminho">URL da foto <span class="optional-label">opcional</span></label>
+							    <input id="fotoCaminho" type="text" th:field="*{fotoCaminho}"
+							           placeholder="Ex.: https://exemplo.com/foto-animal.jpg">
+							    <small class="field-hint">
+							        Informe uma URL pública da imagem caso deseje exibir uma identificação visual do animal.
+							    </small>
+							    <span class="field-error" th:if="${#fields.hasErrors('fotoCaminho')}" th:errors="*{fotoCaminho}"></span>
+							</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="btn btn-light" th:href="@{/animais}">Cancelar</a>
+                            <button class="btn btn-primary" type="submit">Salvar animal</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

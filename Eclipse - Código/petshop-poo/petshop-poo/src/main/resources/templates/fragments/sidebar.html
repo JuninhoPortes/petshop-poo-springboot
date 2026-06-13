@@ -18,14 +18,14 @@
             </div>
         </div>
 
-        <nav class="sidebar-nav">
-            <a th:href="@{/}" th:classappend="${menuAtivo == 'painel'} ? 'active'">Painel</a>
-            <a th:href="@{/proprietarios}" th:classappend="${menuAtivo == 'proprietarios'} ? 'active'">Tutores</a>
-            <a href="#" th:classappend="${menuAtivo == 'animais'} ? 'active'">Animais</a>
-            <a href="#" th:classappend="${menuAtivo == 'servicos'} ? 'active'">Serviços</a>
-            <a href="#" th:classappend="${menuAtivo == 'atendimentos'} ? 'active'">Atendimentos</a>
-            <a href="#" th:classappend="${menuAtivo == 'relatorios'} ? 'active'">Relatórios</a>
-        </nav>
+		<nav class="sidebar-nav">
+		    <a th:href="@{/}" th:classappend="${menuAtivo == 'painel'} ? 'active'">Painel</a>
+		    <a th:href="@{/proprietarios}" th:classappend="${menuAtivo == 'proprietarios'} ? 'active'">Tutores</a>
+		    <a th:href="@{/animais}" th:classappend="${menuAtivo == 'animais'} ? 'active'">Animais</a>
+		    <a href="#" th:classappend="${menuAtivo == 'servicos'} ? 'active'">Serviços</a>
+		    <a href="#" th:classappend="${menuAtivo == 'atendimentos'} ? 'active'">Atendimentos</a>
+		    <a href="#" th:classappend="${menuAtivo == 'relatorios'} ? 'active'">Relatórios</a>
+		</nav>
     </aside>
 </body>
 </html>
