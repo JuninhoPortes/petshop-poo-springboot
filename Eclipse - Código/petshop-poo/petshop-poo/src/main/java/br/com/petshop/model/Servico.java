@@ -16,6 +16,8 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
 
 /**
  * Entidade responsavel por representar os servicos oferecidos pelo pet shop.
@@ -44,7 +46,9 @@ public class Servico {
 
     @NotNull(message = "O preco do servico e obrigatorio.")
     @DecimalMin(value = "0.01", message = "O preco deve ser maior que zero.")
-    @Column(name = "preco_base", nullable = false, precision = 10, scale = 2)
+    @DecimalMax(value = "99999.99", message = "O preco deve ser menor ou igual a R$ 99.999,99.")
+    @Digits(integer = 5, fraction = 2, message = "O preco deve possuir no maximo 5 digitos inteiros e 2 casas decimais.")
+    @Column(name = "preco_base", nullable = false, precision = 7, scale = 2)
     private BigDecimal precoBase;
 
     @Column(nullable = false)

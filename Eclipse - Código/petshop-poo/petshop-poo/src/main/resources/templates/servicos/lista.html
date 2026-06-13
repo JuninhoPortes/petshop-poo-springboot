@@ -1,0 +1,203 @@
+<!--
+    Tela de listagem de servicos.
+
+    Este template apresenta os servicos cadastrados no sistema, permitindo
+    pesquisa por nome, edicao, exclusao controlada e reativacao de registros
+    inativos quando necessario.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Serviços')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('servicos')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Módulo operacional</p>
+                        <h1>Serviços cadastrados</h1>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/servicos/novo}">Novo serviço</a>
+                </header>
+
+                <div th:replace="~{fragments/mensagens :: flash-messages}"></div>
+
+                <section class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Catálogo de serviços</h2>
+                            <p>Consulte os procedimentos disponíveis e seus respectivos valores de referência.</p>
+                        </div>
+                    </div>
+
+                    <form class="filter-bar" th:action="@{/servicos}" method="get">
+                        <input type="text" name="nome" th:value="${nome}" placeholder="Buscar serviço pelo nome">
+                        <button class="btn btn-secondary" type="submit">Pesquisar</button>
+                        <a class="btn btn-light" th:href="@{/servicos}">Limpar</a>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Serviço</th>
+                                    <th>Descrição</th>
+                                    <th>Preço-base</th>
+                                    <th>Status</th>
+                                    <th class="actions-column">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="servico : ${servicos}">
+                                    <td>
+                                        <div class="entity-cell">
+                                            <div class="entity-avatar service-avatar">S</div>
+                                            <div>
+                                                <strong th:text="${servico.nome}">Nome do serviço</strong>
+                                                <span th:text="${servico.ativo ? 'Disponível para atendimento' : 'Serviço inativo'}">
+                                                    Status textual
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td th:text="${servico.descricao != null && !servico.descricao.isBlank() ? servico.descricao : 'Descrição não informada'}">
+                                        Descrição
+                                    </td>
+
+                                    <td th:text="${'R$ ' + #numbers.formatDecimal(servico.precoBase, 1, 'POINT', 2, 'COMMA')}">
+                                        R$ 0,00
+                                    </td>
+
+                                    <td>
+                                        <span th:class="${servico.ativo ? 'badge status-active' : 'badge status-inactive'}"
+                                              th:text="${servico.ativo ? 'Ativo' : 'Inativo'}">
+                                            Ativo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="table-actions">
+                                            <a class="btn btn-small btn-light"
+                                               th:href="@{/servicos/editar/{id}(id=${servico.id})}">
+                                                Editar
+                                            </a>
+
+											<form th:action="@{/servicos/excluir/{id}(id=${servico.id})}"
+											      method="post">
+											    <button class="btn btn-small btn-danger js-open-delete-modal"
+											            type="button"
+											            th:attr="data-nome=${servico.nome}">
+											        Excluir
+											    </button>
+											</form>
+
+											<form th:if="${!servico.ativo}"
+											      th:action="@{/servicos/reativar/{id}(id=${servico.id})}"
+											      method="post">
+											    <button class="btn btn-small btn-primary" type="submit">
+											        Reativar
+											    </button>
+											</form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${#lists.isEmpty(servicos)}">
+                                    <td colspan="5" class="empty-state">
+                                        Nenhum serviço foi encontrado para os critérios informados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="modal-icon">!</div>
+
+            <div class="modal-content">
+                <p class="eyebrow">Confirmação necessária</p>
+                <h2 id="deleteModalTitle">Excluir serviço</h2>
+                <p>
+                    Esta ação tentará remover o serviço
+                    <strong id="deleteEntityName">serviço selecionado</strong>.
+                    Caso ele já tenha sido utilizado em atendimentos, o sistema
+                    fará a inativação para preservar o histórico operacional.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" id="cancelDeleteButton">Cancelar</button>
+                <button class="btn btn-danger-solid" type="button" id="confirmDeleteButton">
+                    Confirmar exclusão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+            Script de controle do modal de exclusao.
+
+            Este trecho substitui a confirmacao nativa do navegador por uma
+            janela integrada ao layout da aplicacao, mantendo o fluxo de envio
+            do formulario processado pelo controller.
+        */
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteModal");
+            const entityName = document.getElementById("deleteEntityName");
+            const cancelButton = document.getElementById("cancelDeleteButton");
+            const confirmButton = document.getElementById("confirmDeleteButton");
+            const openButtons = document.querySelectorAll(".js-open-delete-modal");
+
+            let selectedForm = null;
+
+            function openModal(button) {
+                selectedForm = button.closest("form");
+                entityName.textContent = button.dataset.nome || "registro selecionado";
+                modal.classList.add("is-visible");
+                modal.setAttribute("aria-hidden", "false");
+            }
+
+            function closeModal() {
+                selectedForm = null;
+                modal.classList.remove("is-visible");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            openButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal(button);
+                });
+            });
+
+            cancelButton.addEventListener("click", closeModal);
+
+            confirmButton.addEventListener("click", function () {
+                if (selectedForm) {
+                    selectedForm.submit();
+                }
+            });
+
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("is-visible")) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

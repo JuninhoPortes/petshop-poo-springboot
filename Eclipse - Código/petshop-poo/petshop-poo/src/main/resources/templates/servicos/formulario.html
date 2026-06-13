@@ -1,0 +1,152 @@
+<!--
+    Formulario de cadastro e edicao de servicos.
+
+    Este template permite registrar os procedimentos oferecidos pelo pet shop,
+    incluindo nome, descricao, preco-base e situacao do servico. As validacoes
+    sao aplicadas pela camada Model e complementadas pelas regras da camada
+    Service.
+-->
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PetShop POO | Serviço')}"></head>
+<body>
+    <div class="app-shell">
+        <aside th:replace="~{fragments/sidebar :: sidebar('servicos')}"></aside>
+
+        <main class="main-content">
+            <div class="page-container page-container-narrow">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Cadastro de serviço</p>
+                        <h1 th:text="${tituloPagina}">Novo serviço</h1>
+                        <span th:text="${subtituloPagina}">Preencha os dados do procedimento.</span>
+                    </div>
+                    <a class="btn btn-light" th:href="@{/servicos}">Voltar</a>
+                </header>
+
+                <section class="content-card form-card">
+                    <form th:action="@{/servicos/salvar}" th:object="${servico}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="alert danger" th:if="${#fields.hasGlobalErrors()}">
+                            <p th:each="erro : ${#fields.globalErrors()}" th:text="${erro}"></p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group span-2">
+                                <label for="nome">Nome do serviço</label>
+                                <input id="nome" type="text" th:field="*{nome}" placeholder="Ex.: Banho completo">
+                                <span class="field-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="descricao">Descrição</label>
+                                <textarea id="descricao" th:field="*{descricao}" rows="4"
+                                          placeholder="Descreva brevemente o procedimento, materiais utilizados ou observações relevantes."></textarea>
+                                <span class="field-error" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></span>
+                            </div>
+
+							<div class="form-group">
+							    <label for="precoBaseVisual">Preço-base</label>
+
+							    <input type="hidden" id="precoBase" th:field="*{precoBase}">
+
+							    <input id="precoBaseVisual"
+							           type="text"
+							           inputmode="numeric"
+							           maxlength="10"
+							           placeholder="Ex.: 79,90"
+							           th:attr="data-valor=${servico.precoBase}">
+
+							    <small class="field-hint">
+							        Digite apenas números. O sistema formatará automaticamente o valor em reais.
+							    </small>
+
+							    <span class="field-error" th:if="${#fields.hasErrors('precoBase')}" th:errors="*{precoBase}"></span>
+							</div>
+
+                            <div class="form-group">
+                                <label>Situação</label>
+
+								<input type="hidden" name="_ativo" value="on">
+
+								<label class="switch-row" for="ativo">
+								    <input id="ativo"
+								           name="ativo"
+								           type="checkbox"
+								           value="true"
+								           th:checked="${servico.ativo == null || servico.ativo}">
+								    <span class="switch-box"></span>
+								    <span>Serviço ativo para novos atendimentos</span>
+								</label>
+
+                                <small class="field-hint">
+                                    Serviços inativos permanecem no histórico, mas não devem ser usados em novos lançamentos.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="btn btn-light" th:href="@{/servicos}">Cancelar</a>
+                            <button class="btn btn-primary" type="submit">Salvar serviço</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+	
+	<script>
+	    document.addEventListener("DOMContentLoaded", function () {
+	        const inputVisual = document.getElementById("precoBaseVisual");
+	        const inputReal = document.getElementById("precoBase");
+
+	        function apenasDigitos(valor) {
+	            return valor.replace(/\D/g, "").slice(0, 7);
+	        }
+
+	        function formatarParaTela(digitos) {
+	            if (!digitos) {
+	                return "";
+	            }
+
+	            const numero = Number(digitos) / 100;
+
+	            return numero.toLocaleString("pt-BR", {
+	                minimumFractionDigits: 2,
+	                maximumFractionDigits: 2
+	            });
+	        }
+
+	        function formatarParaEnvio(digitos) {
+	            if (!digitos) {
+	                return "";
+	            }
+
+	            const numero = Number(digitos) / 100;
+	            return numero.toFixed(2);
+	        }
+
+	        function atualizarCampos(valorDigitado) {
+	            const digitos = apenasDigitos(valorDigitado);
+
+	            inputVisual.value = formatarParaTela(digitos);
+	            inputReal.value = formatarParaEnvio(digitos);
+	        }
+
+	        if (inputReal.value) {
+	            const valorInicial = inputReal.value.replace(".", "");
+	            atualizarCampos(valorInicial);
+	        }
+
+	        inputVisual.addEventListener("input", function () {
+	            atualizarCampos(inputVisual.value);
+	        });
+
+	        inputVisual.form.addEventListener("submit", function () {
+	            atualizarCampos(inputVisual.value);
+	        });
+	    });
+	</script>
+</body>
+</html>
