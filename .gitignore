@@ -1,0 +1,27 @@
+# Arquivos gerados pelo Maven
+target/
+
+# Arquivos de build
+*.class
+*.jar
+*.war
+*.ear
+
+# Configuracoes locais de IDE
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+
+# Arquivos temporarios
+*.log
+*.tmp
+*.bak
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Configuracoes locais sensiveis
+.env
